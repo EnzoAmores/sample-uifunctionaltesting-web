@@ -1,13 +1,21 @@
 package utilities;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -15,6 +23,8 @@ import org.openqa.selenium.support.Color;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.asprise.ocr.Ocr;
 
 public class Keywords {
 	WebDriver webDriver;
@@ -24,6 +34,11 @@ public class Keywords {
 	}
 
 	// ==================================================|Do|==================================================
+	public void actionSendKeys(String strKeys) {
+		Actions actions = new Actions(webDriver);
+		actions.sendKeys(strKeys);
+	}
+	
 	/**
 	 * Accepts the browser alert popup.
 	 */
@@ -144,6 +159,53 @@ public class Keywords {
 		webDriver.switchTo().parentFrame();
 	}
 
+	/**
+	 * Take screenshot.
+	 * 
+	 * @param filePath - string where the image is saved.
+	 */
+	public void takeScreenshot(String filePath) throws Exception {
+		TakesScreenshot screenshot = ((TakesScreenshot) webDriver);
+		File fileSource = screenshot.getScreenshotAs(OutputType.FILE);
+		File fileDestination = new File(filePath);
+
+		FileUtils.copyFile(fileSource, fileDestination);
+	}
+
+	/**
+	 * Take screenshot of web element. Width and Height percentage optional.
+	 * 
+	 * @param webElement - web element to screenshot.
+	 * @param intWidthPercentage - width percentage of web element.
+	 * @param intHeightPercentage - height percentage of web element.
+	 * @param filePath   - string where the image is saved.
+	 */
+	public void takeScreenshotOfWebElement(WebElement webElement, int intWidthPercentage, int intHeightPercentage,
+			String filePath) throws Exception {
+		File screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
+		BufferedImage fullImage = ImageIO.read(screenshot);
+		Point point = webElement.getLocation();
+		int webElementWidth = webElement.getSize().getWidth();
+		int webElementHeight = webElement.getSize().getHeight();
+
+		if (intWidthPercentage != 0) {
+			webElementWidth = webElementWidth * (intWidthPercentage / 100);
+		}
+
+		if (intHeightPercentage != 0) {
+			webElementHeight = webElementHeight * (intHeightPercentage / 100);
+		}
+
+		BufferedImage webElementScreenshot = fullImage.getSubimage(point.getX(), point.getY(), webElementWidth,
+				webElementHeight);
+
+		ImageIO.write(webElementScreenshot, "png", screenshot);
+
+		File screenshotLocation = new File(filePath);
+
+		FileUtils.copyFile(screenshot, screenshotLocation);
+	}
+	
 	/**
 	 * Waits for the web element to be visible then clears the value in the web
 	 * element.
@@ -481,6 +543,29 @@ public class Keywords {
 		strFormattedDateTimeNow = simpleDateFormat.format(calendar.getTime());
 
 		return strFormattedDateTimeNow;
+	}
+
+	/**
+	 * Gets the text from the image.
+	 *
+	 * @param strFilePath - file path of the image to be read.
+	 * 
+	 * @return Returns the text image.
+	 * @implNote Mostly used in Asserts.assertEquals, or use in IF ELSE conditions.
+	 */
+	public String getTextFromImage(String strFilePath) {
+		Ocr ocr = new Ocr();
+
+		ocr.startEngine("eng", Ocr.SPEED_FASTEST);
+
+		String strText = ocr.recognize(new File[] { new File(strFilePath) }, Ocr.RECOGNIZE_TYPE_TEXT,
+				Ocr.OUTPUT_FORMAT_PLAINTEXT);
+
+		System.out.println(strText);
+
+		ocr.stopEngine();
+
+		return strText;
 	}
 
 	/**

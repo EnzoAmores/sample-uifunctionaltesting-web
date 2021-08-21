@@ -24,8 +24,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.asprise.ocr.Ocr;
-
 public class Keywords {
 	WebDriver webDriver;
 
@@ -38,7 +36,7 @@ public class Keywords {
 		Actions actions = new Actions(webDriver);
 		actions.sendKeys(strKeys);
 	}
-	
+
 	/**
 	 * Accepts the browser alert popup.
 	 */
@@ -175,10 +173,10 @@ public class Keywords {
 	/**
 	 * Take screenshot of web element. Width and Height percentage optional.
 	 * 
-	 * @param webElement - web element to screenshot.
-	 * @param intWidthPercentage - width percentage of web element.
+	 * @param webElement          - web element to screenshot.
+	 * @param intWidthPercentage  - width percentage of web element.
 	 * @param intHeightPercentage - height percentage of web element.
-	 * @param filePath   - string where the image is saved.
+	 * @param filePath            - string where the image is saved.
 	 */
 	public void takeScreenshotOfWebElement(WebElement webElement, int intWidthPercentage, int intHeightPercentage,
 			String filePath) throws Exception {
@@ -205,7 +203,7 @@ public class Keywords {
 
 		FileUtils.copyFile(screenshot, screenshotLocation);
 	}
-	
+
 	/**
 	 * Waits for the web element to be visible then clears the value in the web
 	 * element.
@@ -543,29 +541,6 @@ public class Keywords {
 		strFormattedDateTimeNow = simpleDateFormat.format(calendar.getTime());
 
 		return strFormattedDateTimeNow;
-	}
-
-	/**
-	 * Gets the text from the image.
-	 *
-	 * @param strFilePath - file path of the image to be read.
-	 * 
-	 * @return Returns the text image.
-	 * @implNote Mostly used in Asserts.assertEquals, or use in IF ELSE conditions.
-	 */
-	public String getTextFromImage(String strFilePath) {
-		Ocr ocr = new Ocr();
-
-		ocr.startEngine("eng", Ocr.SPEED_FASTEST);
-
-		String strText = ocr.recognize(new File[] { new File(strFilePath) }, Ocr.RECOGNIZE_TYPE_TEXT,
-				Ocr.OUTPUT_FORMAT_PLAINTEXT);
-
-		System.out.println(strText);
-
-		ocr.stopEngine();
-
-		return strText;
 	}
 
 	/**

@@ -59,7 +59,18 @@ public class Keywords {
 	public void alertSendKeys(String strKeys) {
 		webDriver.switchTo().alert().sendKeys(strKeys);
 	}
+	
+	/**
+	 * Executes the JavaScript code.
+	 * 
+	 * @param strJavaScript - the javascript to execute.
+	 */
+	public void javaScriptExecutor(String strJavaScript) {
+		JavascriptExecutor jse = (JavascriptExecutor) webDriver;
 
+		jse.executeScript(strJavaScript);
+	}
+	
 	/**
 	 * Navigate back to the last accessed page before the current one if available.
 	 */
@@ -380,6 +391,18 @@ public class Keywords {
 		String strHex = Color.fromString(strColor).asHex();
 
 		return strHex;
+	}
+
+	/**
+	 * Executes the JavaScript code then returns a value.
+	 * 
+	 * @param strJavaScript - the javascript to execute.
+	 * @return Returns the result of the executed JavaScript code.
+	 */
+	public String javaScriptExecutorWithReturn(String strJavaScript) {
+		JavascriptExecutor jse = (JavascriptExecutor) webDriver;
+
+		return (String) jse.executeScript(strJavaScript);
 	}
 
 	// ==================================================|See|==================================================

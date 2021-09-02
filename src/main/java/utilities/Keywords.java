@@ -2,7 +2,10 @@ package utilities;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -10,6 +13,11 @@ import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
@@ -32,6 +40,30 @@ public class Keywords {
 	}
 
 	// ==================================================|Do|==================================================
+	/**
+	 * Converts the color RGBA to hexadecimal value.
+	 * 
+	 * @param strColor - the colors RGBA value to be converted.
+	 * @return Returns the Hexadecimal value of the color.
+	 */
+	public String convertColorToHexadecimal(String strColor) {
+		String strHex = Color.fromString(strColor).asHex();
+
+		return strHex;
+	}
+
+	/**
+	 * Executes the JavaScript code then returns a value.
+	 * 
+	 * @param strJavaScript - the javascript to execute.
+	 * @return Returns the result of the executed JavaScript code.
+	 */
+	public String javaScriptExecutorWithReturn(String strJavaScript) {
+		JavascriptExecutor javaScriptExecutor = (JavascriptExecutor) webDriver;
+
+		return (String) javaScriptExecutor.executeScript(strJavaScript);
+	}
+
 	public void actionSendKeys(String strKeys) {
 		Actions actions = new Actions(webDriver);
 		actions.sendKeys(strKeys);
@@ -59,18 +91,18 @@ public class Keywords {
 	public void alertSendKeys(String strKeys) {
 		webDriver.switchTo().alert().sendKeys(strKeys);
 	}
-	
+
 	/**
 	 * Executes the JavaScript code.
 	 * 
 	 * @param strJavaScript - the javascript to execute.
 	 */
 	public void javaScriptExecutor(String strJavaScript) {
-		JavascriptExecutor jse = (JavascriptExecutor) webDriver;
+		JavascriptExecutor javaScriptExecutor = (JavascriptExecutor) webDriver;
 
-		jse.executeScript(strJavaScript);
+		javaScriptExecutor.executeScript(strJavaScript);
 	}
-	
+
 	/**
 	 * Navigate back to the last accessed page before the current one if available.
 	 */
@@ -106,9 +138,7 @@ public class Keywords {
 	 * Scrolls to the bottom of the current frame.
 	 */
 	public void scrollToBottom() {
-		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-
-		javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+		javaScriptExecutor("window.scrollTo(0, document.body.scrollHeight)");
 	}
 
 	/**
@@ -118,18 +148,14 @@ public class Keywords {
 	 * @param intY - Y coordinate.
 	 */
 	public void scrollToCoordinates(int intX, int intY) {
-		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-
-		javascriptExecutor.executeScript("window.scrollBy(" + intX + "," + intY + ")");
+		javaScriptExecutor("window.scrollBy(" + intX + "," + intY + ")");
 	}
 
 	/**
 	 * Scrolls to the top of the current frame.
 	 */
 	public void scrollToTop() {
-		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-
-		javascriptExecutor.executeScript("window.scrollTo(0, 0)");
+		javaScriptExecutor("window.scrollTo(0, 0)");
 	}
 
 	/**
@@ -141,6 +167,38 @@ public class Keywords {
 		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
 
 		javascriptExecutor.executeScript("arguments[0].scrollIntoView();", webElement);
+	}
+
+	/**
+	 * Create or replace a single cell data of the Excel file.
+	 * 
+	 * @param strFilePath     - Excel file path.
+	 * @param intSheetNumber  - Excel sheet number starts from 0.
+	 * @param intRowNumber    - Excel row number starts from 0.
+	 * @param intColumnNumber - Excel cell number starts from 0.
+	 */
+	public void setExcelCellData(String strFilePath, int intSheetNumber, int intRowNumber, int intColumnNumber,
+			String strValue) throws Exception {
+		FileInputStream fileInputStream = new FileInputStream(strFilePath);
+		XSSFWorkbook workBook = new XSSFWorkbook(fileInputStream);
+		Sheet sheet = workBook.getSheetAt(intSheetNumber);
+		Row row = sheet.getRow(intRowNumber);
+
+		if (row == null)
+			row = sheet.createRow(intRowNumber);
+
+		if (row.getCell(intColumnNumber) != null)
+			row.getCell(intColumnNumber);
+		else
+			row.createCell(intColumnNumber);
+
+		sheet.getRow(intRowNumber).getCell(intColumnNumber).setCellValue(strValue);
+
+		FileOutputStream fileOutputStream = new FileOutputStream(strFilePath);
+
+		workBook.write(fileOutputStream);
+		workBook.close();
+		fileInputStream.close();
 	}
 
 	/**
@@ -171,12 +229,12 @@ public class Keywords {
 	/**
 	 * Take screenshot.
 	 * 
-	 * @param filePath - string where the image is saved.
+	 * @param strFilePath - string where the image is saved.
 	 */
-	public void takeScreenshot(String filePath) throws Exception {
+	public void takeScreenshot(String strFilePath) throws Exception {
 		TakesScreenshot screenshot = ((TakesScreenshot) webDriver);
 		File fileSource = screenshot.getScreenshotAs(OutputType.FILE);
-		File fileDestination = new File(filePath);
+		File fileDestination = new File(strFilePath);
 
 		FileUtils.copyFile(fileSource, fileDestination);
 	}
@@ -187,30 +245,30 @@ public class Keywords {
 	 * @param webElement          - web element to screenshot.
 	 * @param intWidthPercentage  - width percentage of web element.
 	 * @param intHeightPercentage - height percentage of web element.
-	 * @param filePath            - string where the image is saved.
+	 * @param strFilePath         - string where the image is saved.
 	 */
 	public void takeScreenshotOfWebElement(WebElement webElement, int intWidthPercentage, int intHeightPercentage,
-			String filePath) throws Exception {
+			String strFilePath) throws Exception {
 		File screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
 		BufferedImage fullImage = ImageIO.read(screenshot);
 		Point point = webElement.getLocation();
-		int webElementWidth = webElement.getSize().getWidth();
-		int webElementHeight = webElement.getSize().getHeight();
+		int intWebElementWidth = webElement.getSize().getWidth();
+		int intWebElementHeight = webElement.getSize().getHeight();
 
 		if (intWidthPercentage != 0) {
-			webElementWidth = webElementWidth * (intWidthPercentage / 100);
+			intWebElementWidth = intWebElementWidth * (intWidthPercentage / 100);
 		}
 
 		if (intHeightPercentage != 0) {
-			webElementHeight = webElementHeight * (intHeightPercentage / 100);
+			intWebElementHeight = intWebElementHeight * (intHeightPercentage / 100);
 		}
 
-		BufferedImage webElementScreenshot = fullImage.getSubimage(point.getX(), point.getY(), webElementWidth,
-				webElementHeight);
+		BufferedImage webElementScreenshot = fullImage.getSubimage(point.getX(), point.getY(), intWebElementWidth,
+				intWebElementHeight);
 
 		ImageIO.write(webElementScreenshot, "png", screenshot);
 
-		File screenshotLocation = new File(filePath);
+		File screenshotLocation = new File(strFilePath);
 
 		FileUtils.copyFile(screenshot, screenshotLocation);
 	}
@@ -381,31 +439,37 @@ public class Keywords {
 		actions.sendKeys(strKeys).build().perform();
 	}
 
-	/**
-	 * Converts the color RGBA to hexadecimal value.
-	 * 
-	 * @param strColor - the colors RGBA value to be converted.
-	 * @return Returns the Hexadecimal value of the color.
-	 */
-	public String convertColorToHexadecimal(String strColor) {
-		String strHex = Color.fromString(strColor).asHex();
-
-		return strHex;
-	}
-
-	/**
-	 * Executes the JavaScript code then returns a value.
-	 * 
-	 * @param strJavaScript - the javascript to execute.
-	 * @return Returns the result of the executed JavaScript code.
-	 */
-	public String javaScriptExecutorWithReturn(String strJavaScript) {
-		JavascriptExecutor jse = (JavascriptExecutor) webDriver;
-
-		return (String) jse.executeScript(strJavaScript);
-	}
-
 	// ==================================================|See|==================================================
+	/**
+	 * Get all data from the specified row in the Excel file and return a array of
+	 * String.
+	 * 
+	 * @param strFilePath    - Excel file path.
+	 * @param intSheetNumber - Excel sheet number starts from 0.
+	 * @param intRowNumber   - Excel row number starts from 0.
+	 * @return Returns a array list of String.
+	 */
+	public ArrayList<String> getExcelRowData(String strFilePath, int intSheetNumber, int intRowNumber)
+			throws Exception {
+		FileInputStream fileInputStream = new FileInputStream(strFilePath);
+		XSSFWorkbook workBook = new XSSFWorkbook(fileInputStream);
+		Sheet sheet = workBook.getSheetAt(intSheetNumber);
+		Row row = sheet.getRow(intRowNumber);
+		ArrayList<String> arrayListStrRowData = new ArrayList<String>();
+
+		for (Cell cell : row) {
+			DataFormatter dataFormatter = new DataFormatter();
+			String strCellData = dataFormatter.formatCellValue(cell);
+
+			arrayListStrRowData.add(strCellData);
+		}
+
+		workBook.close();
+		fileInputStream.close();
+
+		return arrayListStrRowData;
+	}
+
 	/**
 	 * Checks the web element dropdown options.Web element dropdown must be a SELECT
 	 * tag.
@@ -520,6 +584,31 @@ public class Keywords {
 	 */
 	public String getCurrentPageUrl() {
 		return webDriver.getCurrentUrl();
+	}
+
+	/**
+	 * Get single cell data from Excel file and return the value as String.
+	 * 
+	 * @param strFilePath     - Excel file path.
+	 * @param intSheetNumber  - Excel sheet number starts from 0.
+	 * @param intRowNumber    - Excel row number starts from 0.
+	 * @param intColumnNumber - Excel cell number starts from 0.
+	 * @return Returns a string output.
+	 */
+	public String getExcelCellData(String strFilePath, int intSheetNumber, int intRowNumber, int intColumnNumber)
+			throws Exception {
+		FileInputStream fileInputStream = new FileInputStream(strFilePath);
+		XSSFWorkbook workBook = new XSSFWorkbook(fileInputStream);
+		Sheet sheet = workBook.getSheetAt(intSheetNumber);
+		Row row = sheet.getRow(intRowNumber);
+		Cell cell = row.getCell(intColumnNumber);
+		DataFormatter dataFormatter = new DataFormatter();
+		String strCellData = dataFormatter.formatCellValue(cell);
+
+		workBook.close();
+		fileInputStream.close();
+
+		return strCellData;
 	}
 
 	/**

@@ -64,8 +64,14 @@ public class Keywords {
 		return (String) javaScriptExecutor.executeScript(strJavaScript);
 	}
 
+	/**
+	 * Send keyboard inputs on the focused element or frame.
+	 * 
+	 * @param strKeys - keys/characters to be sent.
+	 */
 	public void actionSendKeys(String strKeys) {
 		Actions actions = new Actions(webDriver);
+
 		actions.sendKeys(strKeys);
 	}
 
@@ -424,19 +430,6 @@ public class Keywords {
 				// wait(50, false);
 			}
 		}
-	}
-
-	/**
-	 * Waits for the web element to be visible then sends the keys/characters to the
-	 * web element. Alternative (Actions).
-	 * 
-	 * @param webElement - web element to perform the action to.
-	 * @param strKeys    - keys/characters to be sent.
-	 */
-	public void webElementActionSendKeys(String strKeys) {
-		Actions actions = new Actions(webDriver);
-
-		actions.sendKeys(strKeys).build().perform();
 	}
 
 	// ==================================================|See|==================================================

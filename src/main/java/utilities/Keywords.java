@@ -32,6 +32,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+
 public class Keywords {
 	WebDriver webDriver;
 
@@ -40,6 +44,82 @@ public class Keywords {
 	}
 
 	// ==================================================|Do|==================================================
+	/**
+	 * Submit a Rest API Delete Request and will return a response output. If
+	 * requestBody is not needed just leave the parameter as blank a string.
+	 * 
+	 * @param requestURL  - Set Rest request URL.
+	 * @param requestBody - Set Json body as string.
+	 * @return Response type as output.
+	 */
+	public Response restDelete(String requestURL, String requestBody) {
+		RequestSpecification request = RestAssured.given();
+
+		request.header("Content-Type", "application/json");
+		request.body(requestBody);
+
+		Response response = request.delete(requestURL);
+
+		return response;
+	}
+
+	/**
+	 * Submit a Rest API Get Request and will return a response output. If
+	 * requestBody is not needed just leave the parameter as blank a string.
+	 * 
+	 * @param requestURL  - Set Rest request URL.
+	 * @param requestBody - Set Json body as string.
+	 * @return Response type as output.
+	 */
+	public Response restGet(String requestURL, String requestBody) {
+		RequestSpecification request = RestAssured.given();
+
+		request.header("Content-Type", "application/json");
+		request.body(requestBody);
+
+		Response response = request.get(requestURL);
+
+		return response;
+	}
+
+	/**
+	 * Submit a Rest API Post Request and will return a response output. If
+	 * requestBody is not needed just leave the parameter as blank a string.
+	 * 
+	 * @param requestURL  - Set Rest request URL.
+	 * @param requestBody - Set Json body as string.
+	 * @return Response type as output.
+	 */
+	public Response restPost(String requestURL, String requestBody) {
+		RequestSpecification request = RestAssured.given();
+
+		request.header("Content-Type", "application/json");
+		request.body(requestBody);
+
+		Response response = request.post(requestURL);
+
+		return response;
+	}
+
+	/**
+	 * Submit a Rest API Put Request and will return a response output. If
+	 * requestBody is not needed just leave the parameter as blank a string.
+	 * 
+	 * @param requestURL  - Set Rest request URL.
+	 * @param requestBody - Set Json body as string.
+	 * @return Response type as output.
+	 */
+	public Response restPut(String requestURL, String requestBody) {
+		RequestSpecification request = RestAssured.given();
+
+		request.header("Content-Type", "application/json");
+		request.body(requestBody);
+
+		Response response = request.put(requestURL);
+
+		return response;
+	}
+
 	/**
 	 * Converts the color RGBA to hexadecimal value.
 	 * 
@@ -71,7 +151,6 @@ public class Keywords {
 	 */
 	public void actionSendKeys(String strKeys) {
 		Actions actions = new Actions(webDriver);
-
 		actions.sendKeys(strKeys);
 	}
 
@@ -205,6 +284,7 @@ public class Keywords {
 		workBook.write(fileOutputStream);
 		workBook.close();
 		fileInputStream.close();
+		fileOutputStream.close();
 	}
 
 	/**
